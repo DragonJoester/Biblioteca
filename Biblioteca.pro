@@ -16,6 +16,7 @@ SOURCES += \
     Modelli/mediawidgetfactory.cpp \
     Widgets/audiolibrowidget.cpp \
     Widgets/filmwidget.cpp \
+    Widgets/formawidget.cpp \
     Widgets/mangawidget.cpp \
     Widgets/mediawidget.cpp \
     Finestre/mainwindow.cpp \
@@ -31,6 +32,7 @@ HEADERS += \
     Modelli/mediawidgetfactory.h \
     Widgets/audiolibrowidget.h \
     Widgets/filmwidget.h \
+    Widgets/formawidget.h \
     Widgets/mangawidget.h \
     Widgets/mediawidget.h \
     Finestre/mainwindow.h

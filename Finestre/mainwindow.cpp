@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <Modelli/audiolibro.h>
+#include <Modelli/film.h>
+#include <Modelli/manga.h>
 #include <Modelli/mediawidgetfactory.h>
 #include <Widgets/mediawidget.h>
 
@@ -44,6 +47,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     mainLayout->addWidget(centraleWidget);
     mainWidget->setLayout(mainLayout);
     setCentralWidget(mainWidget);
+    formAggiunta = nullptr;
 
     connect(cercaBtn, &QPushButton::clicked, this, &MainWindow::filtraMedia);
     connect(aggiungiBtn, &QPushButton::clicked, this, &MainWindow::aggiungiMedia);
@@ -71,9 +75,43 @@ void MainWindow::salvaMedia()
 
 }
 
-void MainWindow::aggiungiMedia()
-{
+void MainWindow::aggiungiMedia() {
+    if (!formAggiunta) {
+        formAggiunta = new FormAWidget;
+        stacked->addWidget(formAggiunta);
 
+        connect(formAggiunta, &FormAWidget::confermato, this, [=](
+            const QString& tipo, const QString& nome, const QString& descrizione,
+            double prezzo, const QString& campo1, const QString& campo2) {
+
+            Media* nuovo = nullptr;
+            if (tipo == "Film") {
+                nuovo = new Film(nome.toStdString(), prezzo, descrizione.toStdString(),
+                                    campo1.toStdString(), campo2.toStdString());
+
+            } else if (tipo == "Manga") {
+                nuovo = new Manga(nome.toStdString(), prezzo,descrizione.toStdString(),
+                                  campo1.toStdString(), campo2.toStdString());
+            } else if (tipo == "AudioLibro") {
+                nuovo = new AudioLibro(nome.toStdString(), prezzo, descrizione.toStdString(),
+                                       campo1.toStdString(), campo2.toStdString());
+            }
+
+            if (nuovo) {
+                db.push_back(nuovo);
+                aggiornaLista();
+                listaMedia->setCurrentRow(static_cast<int>(db.size()) - 1);
+            }
+
+            stacked->setCurrentWidget(new QWidget);
+        });
+
+        connect(formAggiunta, &FormAWidget::annulato, this, [=]() {
+            stacked->setCurrentWidget(new QWidget);
+        });
+    }
+
+    stacked->setCurrentWidget(formAggiunta);
 }
 
 void MainWindow::rimuoviMedia()

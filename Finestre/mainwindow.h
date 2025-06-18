@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QTextEdit>
 #include <vector>
+#include <Widgets/formawidget.h>
 #include "../Modelli/media.h"
 
 class MainWindow : public QMainWindow {
@@ -31,6 +32,7 @@ private:
     QPushButton* eliminaBtn;
     QPushButton* aggiungiBtn;
     std::vector<Media*> db;
+    FormAWidget* formAggiunta;
 
     void aggiornaLista();
 
