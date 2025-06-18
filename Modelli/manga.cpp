@@ -45,3 +45,7 @@ void Manga::fromJson(const QJsonObject& json){
     autore = json["autore"].toString().toStdString();
     genere = json["genere"].toString().toStdString();
 }
+
+void Manga::accept(MediaVisitor& visitor) const {
+    visitor.visit(*this);
+}

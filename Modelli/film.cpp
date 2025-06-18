@@ -48,3 +48,7 @@ void Film::fromJson(const QJsonObject& json){
     regista = json["regista"].toString().toStdString();
     rilascio = json["rilascio"].toString().toStdString();
 }
+
+void Film::accept(MediaVisitor&  visitor) const {
+    visitor.visit(*this);
+}

@@ -13,15 +13,27 @@ SOURCES += \
     Modelli/film.cpp \
     Modelli/manga.cpp \
     Modelli/media.cpp \
+    Modelli/mediawidgetfactory.cpp \
+    Widgets/audiolibrowidget.cpp \
+    Widgets/filmwidget.cpp \
+    Widgets/mangawidget.cpp \
+    Widgets/mediawidget.cpp \
+    Finestre/mainwindow.cpp \
     main.cpp \
-    mainwindow.cpp
+
 
 HEADERS += \
     Modelli/audiolibro.h \
     Modelli/film.h \
     Modelli/manga.h \
     Modelli/media.h \
-    mainwindow.h
+    Modelli/mediavisitor.h \
+    Modelli/mediawidgetfactory.h \
+    Widgets/audiolibrowidget.h \
+    Widgets/filmwidget.h \
+    Widgets/mangawidget.h \
+    Widgets/mediawidget.h \
+    Finestre/mainwindow.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

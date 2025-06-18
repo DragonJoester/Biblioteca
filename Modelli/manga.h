@@ -16,8 +16,10 @@ public:
     void setAutore(const std::string);
     void setGenere(const std::string);
 
-    virtual QJsonObject toJson() const;
-    virtual void fromJson(const QJsonObject&);
+    virtual QJsonObject toJson() const override;
+    virtual void fromJson(const QJsonObject&) override;
+
+    void accept(MediaVisitor&) const override;
 private:
     std::string autore;
     std::string genere;

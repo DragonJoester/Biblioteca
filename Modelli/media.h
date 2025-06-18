@@ -2,6 +2,7 @@
 #define MEDIA_H
 #include <string>
 #include <QJsonObject>
+#include "mediavisitor.h"
 
 class Media
 {
@@ -19,6 +20,8 @@ public:
 
     virtual QJsonObject toJson() const = 0;
     virtual void fromJson(const QJsonObject&) = 0;
+
+    virtual void accept(MediaVisitor&) const = 0;
 private:
     std::string nome;
     double prezzo;

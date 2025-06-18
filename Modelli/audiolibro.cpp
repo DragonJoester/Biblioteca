@@ -47,3 +47,7 @@ void AudioLibro::fromJson(const QJsonObject& json){
     durata = json["durata"].toString().toStdString();
     argomento = json["argomento"].toString().toStdString();
 }
+
+void AudioLibro::accept(MediaVisitor& visitor) const{
+    visitor.visit(*this);
+}
