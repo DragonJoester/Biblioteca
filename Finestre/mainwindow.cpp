@@ -1,15 +1,20 @@
 #include "mainwindow.h"
+#include <QFile>
 #include <QHBoxLayout>
+#include <QJsonArray>
 #include <QVBoxLayout>
 #include <Modelli/audiolibro.h>
 #include <Modelli/film.h>
 #include <Modelli/manga.h>
 #include <Modelli/mediawidgetfactory.h>
 #include <Widgets/mediawidget.h>
+#include <QMessageBox>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     menu = menuBar();
-    menu->addMenu("File");
+    menu->addAction(tr("Salva"));
+    menu->addAction(tr("Importa"));
 
     QWidget* primoWidget = new QWidget;
     QHBoxLayout*  primoLayout = new QHBoxLayout;
@@ -48,15 +53,21 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     mainWidget->setLayout(mainLayout);
     setCentralWidget(mainWidget);
     formAggiunta = nullptr;
+    placeholderVuoto = new QWidget;
+    stacked->addWidget(placeholderVuoto);
+    stacked->setCurrentWidget(placeholderVuoto);
 
     connect(cercaBtn, &QPushButton::clicked, this, &MainWindow::filtraMedia);
     connect(aggiungiBtn, &QPushButton::clicked, this, &MainWindow::aggiungiMedia);
     connect(listaMedia, &QListWidget::currentRowChanged, this, &MainWindow::mostraDettagliMedia);
+    connect(menu, &QMenuBar::triggered, this, &MainWindow::apriFile);
 
-    aggiornaLista();
+    caricaMedia();
 }
 
-MainWindow::~MainWindow() {}
+MainWindow::~MainWindow() {
+    salvaMedia();
+}
 
 void MainWindow::aggiornaLista() {
     listaMedia->clear();
@@ -67,12 +78,52 @@ void MainWindow::aggiornaLista() {
 
 void MainWindow::caricaMedia()
 {
+    db.clear();
+    listaMedia->clear();
 
+    QFile file("db.json");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QByteArray jsonData = file.readAll();
+        file.close();
+
+        QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonData);
+        QJsonArray jsonArray = jsonDocument.array();
+
+        for (const auto& jsonValue : jsonArray) {
+            QJsonObject jsonObject = jsonValue.toObject();
+            if (jsonObject.contains("durata")) {
+                AudioLibro* audio = new AudioLibro();
+                audio->fromJson(jsonObject);
+                db.push_back(audio);
+            } else if (jsonObject.contains("genere")) {
+                Manga* manga = new Manga();
+                manga->fromJson(jsonObject);
+                db.push_back(manga);
+            } else if (jsonObject.contains("regista")) {
+                Film* film = new Film();
+                film->fromJson(jsonObject);
+                db.push_back(film);
+            }
+        }
+    }
+
+    aggiornaLista();
 }
 
-void MainWindow::salvaMedia()
-{
+void MainWindow::salvaMedia() {
+    QJsonArray jsonArray;
 
+    for (const auto& m : db) {
+        jsonArray.append(m->toJson());
+    }
+
+    QJsonDocument jsonDocument(jsonArray);
+
+    QFile file("db.json");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        file.write(jsonDocument.toJson());
+        file.close();
+    }
 }
 
 void MainWindow::aggiungiMedia() {
@@ -104,23 +155,110 @@ void MainWindow::aggiungiMedia() {
             }
 
             stacked->setCurrentWidget(new QWidget);
+            formAggiunta = nullptr;
         });
 
         connect(formAggiunta, &FormAWidget::annulato, this, [=]() {
-            stacked->setCurrentWidget(new QWidget);
+            stacked->setCurrentWidget(placeholderVuoto);
+            formAggiunta = nullptr;
         });
     }
 
     stacked->setCurrentWidget(formAggiunta);
 }
 
-void MainWindow::rimuoviMedia()
-{
+void MainWindow::rimuoviMedia() {
+    int index = listaMedia->currentRow();
+    if (index < 0 || index >= static_cast<int>(db.size())) return;
 
+    auto risposta = QMessageBox::question(this, "Conferma eliminazione",
+        "Sei sicuro di voler eliminare questo media?",
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (risposta == QMessageBox::Yes) {
+        delete db[index];
+        db.erase(db.begin() + index);
+
+        QWidget* widgetAttuale = stacked->currentWidget();
+        if (widgetAttuale != placeholderVuoto && widgetAttuale != formAggiunta) {
+            stacked->removeWidget(widgetAttuale);
+            delete widgetAttuale;
+        }
+        stacked->setCurrentWidget(placeholderVuoto);
+        aggiornaLista();
+    }
 }
 
 void MainWindow::modificaMedia() {
+    int index = listaMedia->currentRow();
+    if (index < 0 || index >= static_cast<int>(db.size()));
 
+    Media* media = db[index];
+
+    if (formAggiunta) {
+        stacked->removeWidget(formAggiunta);
+        delete formAggiunta;
+        formAggiunta = nullptr;
+    }
+
+    formAggiunta = new FormAWidget;
+    stacked->addWidget(formAggiunta);
+
+    QString tipo;
+    QString campo1, campo2;
+    if (auto f = dynamic_cast<Film*>(media)) {
+        tipo = "Film";
+        campo1 = QString::fromStdString(f->getRegista());
+        campo2 = QString::fromStdString(f->getRilascio());
+    } else if (auto m = dynamic_cast<Manga*>(media)) {
+        tipo = "Manga";
+        campo1 = QString::fromStdString(m->getAutore());
+        campo2 = QString::fromStdString(m->getGenere());
+    } else if (auto a = dynamic_cast<AudioLibro*>(media)) {
+        tipo = "AudioLibro";
+        campo1 = QString::fromStdString(a->getArgomento());
+        campo2 = QString::fromStdString(a->getDurata());
+    }
+
+    formAggiunta->setDati(
+        tipo,
+        QString::fromStdString(media->getNome()),
+        QString::fromStdString(media->getDescrizione()),
+        media->getPrezzo(),
+        campo1,
+        campo2);
+
+    connect(formAggiunta, &FormAWidget::confermato, this,
+            [=](const QString& tipo, const QString& nome, const QString& descrizione,
+                                                              double prezzo, const QString& campo1, const QString& campo2) {
+
+        media->setNome(nome.toStdString());
+        media->setDescrizione(descrizione.toStdString());
+        media->setPrezzo(prezzo);
+
+        if (auto f = dynamic_cast<Film*>(media)) {
+            f->setRegista(campo1.toStdString());
+            f->setRilascio(campo2.toStdString());
+        } else if (auto m = dynamic_cast<Manga*>(media)) {
+            m->setAutore(campo1.toStdString());
+            m->setGenere(campo2.toStdString());
+        } else if (auto a = dynamic_cast<AudioLibro*>(media)) {
+            a->setArgomento(campo1.toStdString());
+            a->setDurata(campo2.toStdString());
+        }
+
+        aggiornaLista();
+        listaMedia->setCurrentRow(index);
+        stacked->setCurrentWidget(placeholderVuoto);
+        formAggiunta = nullptr;
+    });
+
+    connect(formAggiunta, &FormAWidget::annulato, this, [=]() {
+        stacked->setCurrentWidget(placeholderVuoto);
+        formAggiunta = nullptr;
+    });
+
+    stacked->setCurrentWidget(formAggiunta);
 }
 
 void MainWindow::gestisciFile()
@@ -159,4 +297,70 @@ void MainWindow::mostraDettagliMedia() {
 
     stacked->addWidget(nuovoWidget);
     stacked->setCurrentWidget(nuovoWidget);
+}
+
+void MainWindow::apriFile(QAction* action) {
+    if (action->text() == "Salva") {
+        QString fileName = QFileDialog::getSaveFileName(this,
+                                                        "Salva JSON", "", "JSON file (*.json)");
+        if (fileName.isEmpty()) return;
+
+        if (!fileName.endsWith(".json", Qt::CaseInsensitive)) {
+            fileName += ".json";
+        }
+
+        QFile file(fileName);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::warning(this, "Errore", "Impossibile aprire il file");
+            return;
+        }
+
+        QJsonArray jsonArray;
+
+        for (const auto& m : db) {
+            jsonArray.append(m->toJson());
+        }
+
+        QJsonDocument jsonDocument(jsonArray);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            file.write(jsonDocument.toJson());
+            file.close();
+        }
+        file.close();
+    } else {
+        QString fileName = QFileDialog::getOpenFileName(this,
+                                                        "Apri JSON", "", "JSON (*.json)");
+        if (fileName.isEmpty()) return;
+        db.clear();
+        db.clear();
+        listaMedia->clear();
+
+        QFile file("db.json");
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QByteArray jsonData = file.readAll();
+            file.close();
+
+            QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonData);
+            QJsonArray jsonArray = jsonDocument.array();
+
+            for (const auto& jsonValue : jsonArray) {
+                QJsonObject jsonObject = jsonValue.toObject();
+                if (jsonObject.contains("durata")) {
+                    AudioLibro* audio = new AudioLibro();
+                    audio->fromJson(jsonObject);
+                    db.push_back(audio);
+                } else if (jsonObject.contains("genere")) {
+                    Manga* manga = new Manga();
+                    manga->fromJson(jsonObject);
+                    db.push_back(manga);
+                } else if (jsonObject.contains("regista")) {
+                    Film* film = new Film();
+                    film->fromJson(jsonObject);
+                    db.push_back(film);
+                }
+            }
+        }
+
+        aggiornaLista();
+    }
 }

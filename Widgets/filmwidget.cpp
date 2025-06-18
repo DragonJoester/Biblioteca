@@ -7,10 +7,12 @@ FilmWidget::FilmWidget(const Film* film, QWidget* parent)
     auto layout = new QVBoxLayout(this);
 
     nomeLabel = new QLabel(QString::fromStdString("<h2>" + film->getNome() + "</h2>"));
-    descrizioneLabel = new QLabel(QString::fromStdString(film->getDescrizione()));
-    prezzoLabel = new QLabel(QString("Prezzo: €%1").arg(film->getPrezzo()));
-    registaLabel = new QLabel(QString::fromStdString("Regista: " + film->getRegista()));
-    rilascioLabel = new QLabel(QString::fromStdString("Rilascio: " + film->getRilascio()));
+    descrizioneLabel = new QLabel(QString::fromStdString("<h3>Descrizione:</h3>\n" + film->getDescrizione()));
+    descrizioneLabel->setWordWrap(true);
+    descrizioneLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    prezzoLabel = new QLabel(QString("<h3>Prezzo:</h3> <h1>€%1</h1>").arg(film->getPrezzo()));
+    registaLabel = new QLabel(QString::fromStdString("<h3>Regista:</h3> " + film->getRegista()));
+    rilascioLabel = new QLabel(QString::fromStdString("<h3>Rilascio:</h3> " + film->getRilascio()));
 
     modificaBtn = new QPushButton("Modifica");
     eliminaBtn = new QPushButton("Elimina");

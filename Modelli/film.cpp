@@ -31,7 +31,7 @@ QJsonObject Film::toJson() const{
     QJsonObject json;
 
     json["nome"] = QString::fromStdString(getNome());
-    json["prezzo"] = QString::fromStdString(std::to_string(getPrezzo()));
+    json["prezzo"] = getPrezzo();
     json["descrizione"] = QString::fromStdString(getDescrizione());
 
     json["regista"] = QString::fromStdString(regista);
@@ -42,7 +42,7 @@ QJsonObject Film::toJson() const{
 
 void Film::fromJson(const QJsonObject& json){
     setNome(json["nome"].toString().toStdString());
-    setPrezzo(json["prezzo"].toString().toDouble());
+    setPrezzo(json["prezzo"].toDouble());
     setDescrizione(json["descrizione"].toString().toStdString());
 
     regista = json["regista"].toString().toStdString();

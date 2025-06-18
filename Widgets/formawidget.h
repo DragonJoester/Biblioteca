@@ -13,6 +13,7 @@ class FormAWidget : public QWidget {
     Q_OBJECT
 public:
     explicit FormAWidget(QWidget* parent = nullptr);
+    void setDati(const QString&, const QString&, const QString&, double, const QString&, const QString&);
 signals:
     void confermato(const QString& tipo, const QString& nome, const QString& descrizione,
                     double prezzo, const QString& campo1, const QString& campo2);

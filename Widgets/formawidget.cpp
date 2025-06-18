@@ -1,5 +1,6 @@
 #include "formawidget.h"
 #include <QDoubleValidator>
+#include <QMessageBox>
 
 FormAWidget::FormAWidget(QWidget* parent) : QWidget(parent) {
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -10,7 +11,11 @@ FormAWidget::FormAWidget(QWidget* parent) : QWidget(parent) {
     nomeEdit = new QLineEdit;
     descrizioneEdit = new QLineEdit;
     prezzoEdit = new QLineEdit;
-    prezzoEdit->setValidator(new QDoubleValidator(0, 9999, 2, this));
+    QDoubleValidator* validator = new QDoubleValidator(0, 9999, 2, this);
+    validator->setNotation(QDoubleValidator::StandardNotation);
+    validator->setLocale(QLocale::C);
+    prezzoEdit->setValidator(validator);
+
 
     QFormLayout* formLayout = new QFormLayout;
     formLayout->addRow("Tipo:", tipoCombo);
@@ -65,30 +70,60 @@ FormAWidget::FormAWidget(QWidget* parent) : QWidget(parent) {
     aggiornaCampiSpecifici();
 }
 
+void FormAWidget::setDati(const QString& tipo, const QString& nome, const QString& descrizione, double prezzo,
+                          const QString& campo1, const QString& campo2) {
+    tipoCombo->setCurrentText(tipo);
+    nomeEdit->setText(nome);
+    descrizioneEdit->setText(descrizione);
+    prezzoEdit->setText(QString::number(prezzo));
+
+    aggiornaCampiSpecifici();
+
+    if (tipo == "Film") {
+        registaEdit->setText(campo1);
+        rilascioEdit->setText(campo2);
+    } else if (tipo == "Manga") {
+        autoreEdit->setText(campo1);
+        genereEdit->setText(campo2);
+    } else if (tipo == "AudioLibro") {
+        argomentoEdit->setText(campo1);
+        durataEdit->setText(campo2);
+    }
+
+}
+
 void FormAWidget::aggiornaCampiSpecifici() {
     specificiStack->setCurrentIndex(tipoCombo->currentIndex());
 }
 
 void FormAWidget::inviaDati() {
     QString tipo = tipoCombo->currentText();
+    QString nome = nomeEdit->text().trimmed();
+    QString descrizione = descrizioneEdit->text().trimmed();
+    double prezzo = QLocale::c().toDouble(prezzoEdit->text());
     QString campo1, campo2;
 
     if (tipo == "Film") {
-        campo1 = registaEdit->text();
-        campo2 = rilascioEdit->text();
+        campo1 = registaEdit->text().trimmed();
+        campo2 = rilascioEdit->text().trimmed();
     } else if (tipo == "Manga") {
-        campo1 = autoreEdit->text();
-        campo2 = genereEdit->text();
+        campo1 = autoreEdit->text().trimmed();
+        campo2 = genereEdit->text().trimmed();
     } else if (tipo == "AudioLibro") {
-        campo1 = argomentoEdit->text();
-        campo2 = durataEdit->text();
+        campo1 = argomentoEdit->text().trimmed();
+        campo2 = durataEdit->text().trimmed();
+    }
+
+    if (nome.isEmpty() || descrizione.isEmpty() || prezzo <= 0.0 || campo1.isEmpty() || campo2.isEmpty()) {
+        QMessageBox::warning(this, "Campi mancanti", "Compila tutti i campi correttamente");
+        return;
     }
 
     emit confermato(
         tipo,
-        nomeEdit->text(),
-        descrizioneEdit->text(),
-        prezzoEdit->text().toDouble(),
+        nome,
+        descrizione,
+        prezzo,
         campo1,
         campo2
         );

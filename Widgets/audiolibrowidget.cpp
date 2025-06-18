@@ -8,10 +8,12 @@ AudioLibroWidget::AudioLibroWidget(const AudioLibro* audio, QWidget* parent)
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     nomeLabel = new QLabel(QString::fromStdString("<h2>" + audio->getNome() + "</h2>"));
-    descrizioneLabel = new QLabel(QString::fromStdString(audio->getDescrizione()));
-    prezzoLabel = new QLabel(QString("Prezzo: €%1").arg(audio->getPrezzo()));
-    argomentoLabel = new QLabel(QString::fromStdString("Argomento: " + audio->getArgomento()));
-    durataLabel = new QLabel(QString::fromStdString("Durata: " + audio->getDurata()));
+    descrizioneLabel = new QLabel(QString::fromStdString("<h3>Descrizione:</h3>\n" + audio->getDescrizione()));
+    descrizioneLabel->setWordWrap(true);
+    descrizioneLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    prezzoLabel = new QLabel(QString("<h3>Prezzo:</h3> <h1>€%1</h1>").arg(audio->getPrezzo()));
+    argomentoLabel = new QLabel(QString::fromStdString("<h3>Argomento:</h3> " + audio->getArgomento()));
+    durataLabel = new QLabel(QString::fromStdString("<h3>Durata:</h3> " + audio->getDurata()));
 
     modificaBtn = new QPushButton("Modifica");
     eliminaBtn = new QPushButton("Elimina");

@@ -27,12 +27,12 @@ private:
     QListWidget* listaMedia;
     QStackedWidget* stacked;
 
-    // MediaWidget* mediaWidget;
     QPushButton* modificaBtn;
     QPushButton* eliminaBtn;
     QPushButton* aggiungiBtn;
     std::vector<Media*> db;
     FormAWidget* formAggiunta;
+    QWidget* placeholderVuoto;
 
     void aggiornaLista();
 
@@ -46,6 +46,7 @@ private slots:
     void gestisciFile();
     void filtraMedia();
     void mostraDettagliMedia();
+    void apriFile(QAction*);
 
 };
 #endif // MAINWINDOW_H

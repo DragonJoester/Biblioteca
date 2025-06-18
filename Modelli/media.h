@@ -22,6 +22,7 @@ public:
     virtual void fromJson(const QJsonObject&) = 0;
 
     virtual void accept(MediaVisitor&) const = 0;
+    virtual ~Media() = default;
 private:
     std::string nome;
     double prezzo;
