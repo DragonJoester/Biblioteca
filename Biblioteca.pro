@@ -1,6 +1,6 @@
-QT       += core gui svg
+QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets svg
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
 
@@ -44,6 +44,3 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     .gitignore
-
-RESOURCES += \
-    Icons/icons.qrc

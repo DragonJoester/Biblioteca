@@ -43,7 +43,6 @@ private slots:
     void aggiungiMedia();
     void rimuoviMedia();
     void modificaMedia();
-    void gestisciFile();
     void filtraMedia();
     void mostraDettagliMedia();
     void apriFile(QAction*);

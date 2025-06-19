@@ -7,6 +7,8 @@ MangaWidget::MangaWidget(const Manga* manga, QWidget* parent)
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     nomeLabel = new QLabel(QString::fromStdString("<h1>📚" + manga->getNome() + "</h1>"));
+    nomeLabel->setWordWrap(true);
+    nomeLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     descrizioneLabel = new QLabel(QString::fromStdString("<h3>Descrizione:</h3>\n" + manga->getDescrizione()));
     descrizioneLabel->setWordWrap(true);
     descrizioneLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);

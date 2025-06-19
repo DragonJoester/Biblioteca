@@ -7,6 +7,8 @@ FilmWidget::FilmWidget(const Film* film, QWidget* parent)
     auto layout = new QVBoxLayout(this);
 
     nomeLabel = new QLabel(QString::fromStdString("<h1>🍿" + film->getNome() + "</h1>"));
+    nomeLabel->setWordWrap(true);
+    nomeLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     descrizioneLabel = new QLabel(QString::fromStdString("<h3>Descrizione:</h3>\n" + film->getDescrizione()));
     descrizioneLabel->setWordWrap(true);
     descrizioneLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);

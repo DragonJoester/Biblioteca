@@ -10,6 +10,7 @@
 #include <Widgets/mediawidget.h>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QJsonDocument>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     setFixedSize(800, 600);
@@ -92,7 +93,7 @@ void MainWindow::caricaMedia()
         QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonData);
         QJsonArray jsonArray = jsonDocument.array();
 
-        for (const auto& jsonValue : jsonArray) {
+        for (const auto& jsonValue : std::as_const(jsonArray)) {
             QJsonObject jsonObject = jsonValue.toObject();
             if (jsonObject.contains("durata")) {
                 AudioLibro* audio = new AudioLibro();
@@ -187,14 +188,14 @@ void MainWindow::rimuoviMedia() {
             stacked->removeWidget(widgetAttuale);
             delete widgetAttuale;
         }
-        stacked->setCurrentWidget(placeholderVuoto);
         aggiornaLista();
+        stacked->setCurrentWidget(placeholderVuoto);
     }
 }
 
 void MainWindow::modificaMedia() {
     int index = listaMedia->currentRow();
-    if (index < 0 || index >= static_cast<int>(db.size()));
+    if (index < 0 || index >= static_cast<int>(db.size())) return;
 
     Media* media = db[index];
 
@@ -234,6 +235,7 @@ void MainWindow::modificaMedia() {
     connect(formAggiunta, &FormAWidget::confermato, this,
             [=](const QString& tipo, const QString& nome, const QString& descrizione,
                                                               double prezzo, const QString& campo1, const QString& campo2) {
+        qDebug() << tipo;
 
         media->setNome(nome.toStdString());
         media->setDescrizione(descrizione.toStdString());
@@ -262,11 +264,6 @@ void MainWindow::modificaMedia() {
     });
 
     stacked->setCurrentWidget(formAggiunta);
-}
-
-void MainWindow::gestisciFile()
-{
-
 }
 
 void MainWindow::filtraMedia() {
@@ -319,16 +316,12 @@ void MainWindow::apriFile(QAction* action) {
         }
 
         QJsonArray jsonArray;
-
         for (const auto& m : db) {
             jsonArray.append(m->toJson());
         }
 
         QJsonDocument jsonDocument(jsonArray);
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            file.write(jsonDocument.toJson());
-            file.close();
-        }
+        file.write(jsonDocument.toJson());
         file.close();
     } else {
         QString fileName = QFileDialog::getOpenFileName(this,
@@ -346,7 +339,7 @@ void MainWindow::apriFile(QAction* action) {
             QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonData);
             QJsonArray jsonArray = jsonDocument.array();
 
-            for (const auto& jsonValue : jsonArray) {
+            for (const auto& jsonValue : std::as_const(jsonArray)) {
                 QJsonObject jsonObject = jsonValue.toObject();
                 if (jsonObject.contains("durata")) {
                     AudioLibro* audio = new AudioLibro();
