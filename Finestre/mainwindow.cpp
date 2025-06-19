@@ -12,6 +12,9 @@
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+    setFixedSize(800, 600);
+    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
     menu = menuBar();
     menu->addAction(tr("Salva"));
     menu->addAction(tr("Importa"));

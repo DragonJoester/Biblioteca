@@ -7,7 +7,7 @@ AudioLibroWidget::AudioLibroWidget(const AudioLibro* audio, QWidget* parent)
 
     QVBoxLayout* layout = new QVBoxLayout(this);
 
-    nomeLabel = new QLabel(QString::fromStdString("<h2>" + audio->getNome() + "</h2>"));
+    nomeLabel = new QLabel(QString::fromStdString("<h1>🎧" + audio->getNome() + "</h1>"));
     descrizioneLabel = new QLabel(QString::fromStdString("<h3>Descrizione:</h3>\n" + audio->getDescrizione()));
     descrizioneLabel->setWordWrap(true);
     descrizioneLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
