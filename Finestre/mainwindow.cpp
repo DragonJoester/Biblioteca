@@ -199,6 +199,10 @@ void MainWindow::modificaMedia() {
 
     Media* media = db[index];
 
+    if (!media) {
+        return;
+    }
+
     if (formAggiunta) {
         stacked->removeWidget(formAggiunta);
         delete formAggiunta;
