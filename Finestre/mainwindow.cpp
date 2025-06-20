@@ -176,26 +176,34 @@ void MainWindow::rimuoviMedia() {
     if (index < 0 || index >= static_cast<int>(db.size())) return;
 
     auto risposta = QMessageBox::question(this, "Conferma eliminazione",
-        "Sei sicuro di voler eliminare questo media?",
-        QMessageBox::Yes | QMessageBox::No);
+                                          "Sei sicuro di voler eliminare questo media?",
+                                          QMessageBox::Yes | QMessageBox::No);
 
     if (risposta == QMessageBox::Yes) {
         delete db[index];
         db.erase(db.begin() + index);
 
         QWidget* widgetAttuale = stacked->currentWidget();
-        if (widgetAttuale != formAggiunta && widgetAttuale != placeholderVuoto) {
+
+        // Elimina il widget se è ancora nello stack e non è il placeholder
+        if (widgetAttuale && stacked->indexOf(widgetAttuale) != -1 &&
+            widgetAttuale != placeholderVuoto && widgetAttuale != formAggiunta) {
             stacked->removeWidget(widgetAttuale);
-            delete widgetAttuale;
+            widgetAttuale->deleteLater();
         }
+
         aggiornaLista();
         stacked->setCurrentWidget(placeholderVuoto);
     }
 }
 
+
 void MainWindow::modificaMedia() {
     int index = listaMedia->currentRow();
-    if (index < 0 || index >= static_cast<int>(db.size())) return;
+    if (index < 0 || index >= static_cast<int>(db.size())) {
+        stacked->setCurrentWidget(placeholderVuoto);
+        return;
+    }
 
     Media* media = db[index];
 
@@ -280,7 +288,10 @@ void MainWindow::filtraMedia() {
 
 void MainWindow::mostraDettagliMedia() {
     int index = listaMedia->currentRow();
-    if (index < 0 || index >= static_cast<int>(db.size())) return;
+    if (index < 0 || index >= static_cast<int>(db.size())) {
+        stacked->setCurrentWidget(placeholderVuoto);
+        return;
+    }
 
     const Media* media = db[index];
     if (!media) return;
@@ -288,19 +299,23 @@ void MainWindow::mostraDettagliMedia() {
     MediaWidgetFactory factory(this);
     media->accept(factory);
     MediaWidget* nuovoWidget = dynamic_cast<MediaWidget*>(factory.getWidget());
-
     if (!nuovoWidget) return;
 
     connect(nuovoWidget, &MediaWidget::modificaRichiesta, this, &MainWindow::modificaMedia);
     connect(nuovoWidget, &MediaWidget::eliminaRichiesta, this, &MainWindow::rimuoviMedia);
 
     QWidget* vecchio = stacked->currentWidget();
-    if (vecchio)
+
+    // Evita di rimuovere il placeholder o il form
+    if (vecchio && vecchio != placeholderVuoto && vecchio != formAggiunta) {
         stacked->removeWidget(vecchio);
+        vecchio->deleteLater();
+    }
 
     stacked->addWidget(nuovoWidget);
     stacked->setCurrentWidget(nuovoWidget);
 }
+
 
 void MainWindow::apriFile(QAction* action) {
     if (action->text() == "Salva") {
