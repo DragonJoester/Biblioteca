@@ -184,7 +184,7 @@ void MainWindow::rimuoviMedia() {
         db.erase(db.begin() + index);
 
         QWidget* widgetAttuale = stacked->currentWidget();
-        if (widgetAttuale != placeholderVuoto && widgetAttuale != formAggiunta) {
+        if (widgetAttuale != formAggiunta || widgetAttuale != placeholderVuoto) {
             stacked->removeWidget(widgetAttuale);
             delete widgetAttuale;
         }
@@ -199,9 +199,7 @@ void MainWindow::modificaMedia() {
 
     Media* media = db[index];
 
-    if (!media) {
-        return;
-    }
+    if (!media) return;
 
     if (formAggiunta) {
         stacked->removeWidget(formAggiunta);
@@ -285,6 +283,7 @@ void MainWindow::mostraDettagliMedia() {
     if (index < 0 || index >= static_cast<int>(db.size())) return;
 
     const Media* media = db[index];
+    if (!media) return;
 
     MediaWidgetFactory factory(this);
     media->accept(factory);

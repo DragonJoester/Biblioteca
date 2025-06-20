@@ -65,7 +65,9 @@ FormAWidget::FormAWidget(QWidget* parent) : QWidget(parent) {
 
     connect(tipoCombo, &QComboBox::currentIndexChanged, this, &FormAWidget::aggiornaCampiSpecifici);
     connect(confermaBtn, &QPushButton::clicked, this, &FormAWidget::inviaDati);
-    connect(annullaBtn, &QPushButton::clicked, this, &FormAWidget::annulato);
+    connect(annullaBtn, &QPushButton::clicked, this, [=]() {
+        emit annulato();
+    });
 
     aggiornaCampiSpecifici();
 }
