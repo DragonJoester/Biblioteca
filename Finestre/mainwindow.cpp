@@ -185,7 +185,6 @@ void MainWindow::rimuoviMedia() {
 
         QWidget* widgetAttuale = stacked->currentWidget();
 
-        // Elimina il widget se è ancora nello stack e non è il placeholder
         if (widgetAttuale && stacked->indexOf(widgetAttuale) != -1 &&
             widgetAttuale != placeholderVuoto && widgetAttuale != formAggiunta) {
             stacked->removeWidget(widgetAttuale);
@@ -349,7 +348,7 @@ void MainWindow::apriFile(QAction* action) {
         db.clear();
         listaMedia->clear();
 
-        QFile file("db.json");
+        QFile file(fileName);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QByteArray jsonData = file.readAll();
             file.close();
