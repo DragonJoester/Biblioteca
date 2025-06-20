@@ -184,7 +184,7 @@ void MainWindow::rimuoviMedia() {
         db.erase(db.begin() + index);
 
         QWidget* widgetAttuale = stacked->currentWidget();
-        if (widgetAttuale != formAggiunta || widgetAttuale != placeholderVuoto) {
+        if (widgetAttuale != formAggiunta && widgetAttuale != placeholderVuoto) {
             stacked->removeWidget(widgetAttuale);
             delete widgetAttuale;
         }
